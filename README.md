@@ -79,22 +79,29 @@ Client-server chat applications are foundational to real-time communication over
 
 import socket
 
+# Create socket
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-client.connect(("localhost", 9999))
+host = "127.0.0.1"
+port = 12345
 
-done=False
+# Connect to server
+client.connect((host, port))
 
-while not done:
-    client.send(input("Message ").encode('utf-8'))
-    msg = client.recv(1024).decode('utf-8')
+while True:
+    # Send message to server
+    msg = input("Client: ")
+    client.send(msg.encode())
 
-    if msg == 'quit':
-        done=True
-    else:
-        print(msg)
+    if msg.lower() == "exit":
+        break
 
+    # Receive reply from server
+    server_msg = client.recv(1024).decode()
+    print("Server:", server_msg)
 
+    if server_msg.lower() == "exit":
+        break
 
 client.close()
 
@@ -102,33 +109,44 @@ client.close()
 ### `server.py`
 ```python
 import socket
-from base64 import decode
-from operator import truediv
 
-server =socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(('localhost', 9999))
-server.listen()
-client,addr=server.accept()
+# Create socket
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-done = False
+host = "127.0.0.1"
+port = 12345
 
-while not done:
-    msg = client.recv(1024).decode('utf-8')
+# Bind and listen
+server.bind((host, port))
+server.listen(1)
 
-    if msg == 'quit':
-        done = True
-    else:
-        print(msg)
+print("Server waiting for connection...")
 
-    client.send(input("Message ").encode('utf-8'))
+conn, addr = server.accept()
+print("Connected to:", addr)
 
+while True:
+    # Receive message from client
+    client_msg = conn.recv(1024).decode()
+    print("Client:", client_msg)
 
-client.close()
+    if client_msg.lower() == "exit":
+        break
+
+    # Send message to client
+    msg = input("Server: ")
+    conn.send(msg.encode())
+
+    if msg.lower() == "exit":
+        break
+
+conn.close()
 server.close()
 ```
 
 ## OUTPUT:
-![image](https://github.com/user-attachments/assets/3387a89a-890f-4322-900f-9aed4ceee866)
+<img width="719" height="200" alt="image" src="https://github.com/user-attachments/assets/fc07f490-4930-4d13-b494-9d1a9d150ccd" />
+<img width="717" height="253" alt="image" src="https://github.com/user-attachments/assets/ce59a70e-46b1-463a-978f-9903387e4846" />
 
 
 
